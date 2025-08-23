@@ -8,8 +8,9 @@ from authu.views import dashboard_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('auth/', include('authu.urls', namespace='authu')),
+    path('admin/login/', lambda request: redirect('authu:login')),
+    path('accounts/login/', lambda request: redirect('authu:login')),
+    path('authu/', include('authu.urls')),
     path('', lambda request: redirect('dashboard')),  # root redirects to dashboard
     path('dashboard/', dashboard_view, name="dashboard"),
 
