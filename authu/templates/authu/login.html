@@ -1,30 +1,116 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login</title>
-     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Retail Management</title>
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <style>
+    /* Reset & body */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #8e44ad, #3498db);
+      color: #333;
+    }
+
+    /* Container */
+    .container {
+      background: #fff;
+      padding: 30px 25px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #8e44ad;
+    }
+
+    /* Messages */
+    .messages {
+      list-style: none;
+      margin-bottom: 15px;
+      padding: 0;
+    }
+    .messages li {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .messages li.error { background: #f8d7da; color: #721c24; }
+    .messages li.success { background: #d4edda; color: #155724; }
+
+    /* Form inputs */
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    /* Button */
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #8e44ad;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background-color: #732d91; }
+
+    /* Links */
+    p {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    p a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    p a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 25px 15px;
+      }
+      h2 { font-size: 22px; }
+      input, button { font-size: 14px; padding: 10px; }
+    }
+  </style>
 </head>
- <center><body>
-    <div class="container">
-        <h2>Login</h2>
-        {% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>
-        {{ message }}
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
-       <form method="post">
-            {% csrf_token %}
-            <input type="text" name="username" placeholder="Enter Username" required>
-            <input type="password" name="password" placeholder="Enter Password" required>
-            <button type="submit" href="{% url 'dashboard' %}">Login</button>
-        </form>
-        <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
-    </div>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" name="username" placeholder="Enter Username" required>
+      <input type="password" name="password" placeholder="Enter Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+  </div>
 </body>
-</center>
 </html>
