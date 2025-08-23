@@ -25,9 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-nwt&10ka8!vhkm#@5wz)ducj812ojf1yo-5hk2u*g=*9j#(o#j'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+#DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['rms-web-6319.onrender.com', '127.0.0.1', 'localhost']
 CSRF_TRUSTED_ORIGINS = []
 
 # Render sets this automatically; handy to avoid hardcoding your onrender.com host
@@ -142,7 +143,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = "/authu/login/"
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = '/authu/login/'  # was /accounts/login/
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "Product" / "media"
