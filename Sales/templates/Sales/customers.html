@@ -1,62 +1,135 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customers • Sales Reporting</title>
-  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
-<header>
-  <h1>Sales Reporting Analysis Dashboard</h1>
-  <div class="filters">
-    <form method="get">
-      {{ form.start_date }} {{ form.end_date }}
-      <button class="btn btn-primary" type="submit">Apply</button>
-      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
-      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
-    </form>
+<body class="bg-gray-50 font-sans antialiased">
+
+<header class="bg-white shadow p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+  <!-- Title -->
+  <h1 class="text-2xl font-bold text-indigo-600">Customer Dashboard</h1>
+
+  <!-- Buttons side by side -->
+  <div class="flex gap-2">
+    <a href="{% url 'Sales:export_csv' %}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400 transition">
+      <i class="fas fa-file-csv"></i> CSV
+    </a>
+    <a href="{% url 'Sales:export_json' %}" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 transition">
+      <i class="fas fa-file-code"></i> JSON
+    </a>
   </div>
 </header>
-<div class="container">
-  <div class="grid kpis">
-    <div class="card"><div class="kpi"><div><div class="label badge">Total Revenue (Today)</div><div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div></div><div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Orders Today</div><div class="value">{{ kpis.orders.value }}</div></div><div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Active Customers</div><div class="value">{{ kpis.customers.value }}</div></div><div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Growth Rate</div><div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div></div><div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%</div></div></div>
+
+
+<main class="container mx-auto p-4 space-y-6">
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div class="text-gray-500 font-semibold">Total Revenue (Today)</div>
+        <i class="fas fa-coins text-indigo-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">₹ {{ kpis.revenue.value|floatformat:2 }}</div>
+      <div class="mt-1 {% if kpis.revenue.diff >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+        {% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div class="text-gray-500 font-semibold">Orders Today</div>
+        <i class="fas fa-shopping-cart text-pink-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">{{ kpis.orders.value }}</div>
+      <div class="mt-1 {% if kpis.orders.diff >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+        {% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div class="text-gray-500 font-semibold">Active Customers</div>
+        <i class="fas fa-users text-yellow-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">{{ kpis.customers.value }}</div>
+      <div class="mt-1 {% if kpis.customers.diff >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+        {% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div class="text-gray-500 font-semibold">Growth Rate</div>
+        <i class="fas fa-chart-line text-green-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">₹ {{ kpis.growth.value|floatformat:2 }}</div>
+      <div class="mt-1 {% if kpis.growth.diff >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+        {% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%
+      </div>
+    </div>
   </div>
 
-  <nav class="section-tabs">
-    <a href="{% url 'Sales:daily' %}">Daily</a>
-    <a href="{% url 'Sales:monthly' %}">Monthly</a>
-    <a href="{% url 'Sales:products' %}">Products</a>
-    <a href="{% url 'Sales:top_sellers' %}">Top Sellers</a>
-    <a href="{% url 'Sales:customers' %}" class="active">Customers</a>
+  <!-- Tabs -->
+  <nav class="flex flex-wrap gap-2 bg-gray-100 p-2 rounded-lg">
+    <a href="{% url 'Sales:daily' %}" class="px-4 py-2 rounded-lg {% if section == 'daily' %}bg-indigo-600 text-white{% else %}text-indigo-600 hover:bg-indigo-200{% endif %}">Daily</a>
+    <a href="{% url 'Sales:monthly' %}" class="px-4 py-2 rounded-lg {% if section == 'monthly' %}bg-indigo-600 text-white{% else %}text-indigo-600 hover:bg-indigo-200{% endif %}">Monthly</a>
+    <a href="{% url 'Sales:products' %}" class="px-4 py-2 rounded-lg {% if section == 'products' %}bg-indigo-600 text-white{% else %}text-indigo-600 hover:bg-indigo-200{% endif %}">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}" class="px-4 py-2 rounded-lg {% if section == 'top_sellers' %}bg-indigo-600 text-white{% else %}text-indigo-600 hover:bg-indigo-200{% endif %}">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}" class="px-4 py-2 rounded-lg {% if section == 'customers' %}bg-indigo-600 text-white{% else %}text-indigo-600 hover:bg-indigo-200{% endif %}">Customers</a>
   </nav>
 
-  <div class="card">
-    <h3>Top Value Customers</h3>
-    <table class="table">
-      <thead><tr><th>#</th><th>Name</th><th>Joined</th><th>Orders</th><th>Total Spent</th></tr></thead>
+  <!-- Top Customers Table -->
+  <div class="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+    <h3 class="text-xl font-bold mb-4">Top Value Customers</h3>
+    <table class="min-w-full text-left border-collapse table-auto">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="px-4 py-2 border">#</th>
+          <th class="px-4 py-2 border">Name</th>
+          <th class="px-4 py-2 border">Joined</th>
+          <th class="px-4 py-2 border">Orders</th>
+          <th class="px-4 py-2 border">Total Spent</th>
+        </tr>
+      </thead>
       <tbody>
         {% for c in top_customers %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ c.customer__name }}</td>
-          <td>{{ c.customer__joined_at }}</td>
-          <td>{{ c.orders }}</td>
-          <td>₹ {{ c.spent|floatformat:2 }}</td>
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border">{{ forloop.counter }}</td>
+          <td class="px-4 py-2 border">{{ c.customer__name }}</td>
+          <td class="px-4 py-2 border">{{ c.customer__joined_at }}</td>
+          <td class="px-4 py-2 border">{{ c.orders }}</td>
+          <td class="px-4 py-2 border">₹ {{ c.spent|floatformat:2 }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <div class="grid" style="grid-template-columns: repeat(3,1fr)">
-    <div class="card"><h3>New Customers (7d)</h3><div class="value">{{ activity.new_customers }}</div></div>
-    <div class="card"><h3>Regular Purchases (30d)</h3><div class="value">{{ activity.regular_purchases }}</div></div>
-    <div class="card"><h3>Inactive (90d)</h3><div class="value">{{ activity.inactive_90d }}</div></div>
+  <!-- Customer Activity Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <h3 class="font-semibold text-gray-700 mb-2">New Customers (7d)</h3>
+      <div class="text-2xl font-bold text-indigo-600">{{ activity.new_customers }}</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <h3 class="font-semibold text-gray-700 mb-2">Regular Purchases (30d)</h3>
+      <div class="text-2xl font-bold text-green-600">{{ activity.regular_purchases }}</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <h3 class="font-semibold text-gray-700 mb-2">Inactive (90d)</h3>
+      <div class="text-2xl font-bold text-red-600">{{ activity.inactive_90d }}</div>
+    </div>
   </div>
-</div>
+
+</main>
+
+<footer class="text-center text-sm text-gray-500 p-4 mt-6">© 2025 Sales Reporting</footer>
+
 </body>
 </html>
