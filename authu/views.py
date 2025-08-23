@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import InventoryItem
 from Product.models import Product
-from Inventory.models import Product
 
 @login_required
 def dashboard_view(request):
@@ -34,36 +33,23 @@ def signup_view(request):
 
     return render(request, 'authu/signup.html')
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username'].strip()
-        password = request.POST['password']
-
-        # Authenticate user
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
-
-        if user is not None:
+        if user:
             login(request, user)
-            return redirect('home')  # Redirect to home page
+            return redirect('/dashboard/')  # redirect to dashboard after login
         else:
             messages.error(request, "Invalid username or password")
-            return redirect('login')
-
     return render(request, 'authu/login.html')
 
 def logout_view(request):
     logout(request)
     return redirect('login')
 
-def home_view(request):
-    if not request.user.is_authenticated:
-        return render(request, 'Retail/dashboard.html')
-    
-    products = Product.objects.all()
-    return render(request, 'Retail/dashboard.html', {'products': products})
-
-
-@login_required(login_url='login')
+@login_required(login_url='/authu/login/')
 def home_view(request):
     return render(request, 'Retail/dashboard.html')
 @login_required
