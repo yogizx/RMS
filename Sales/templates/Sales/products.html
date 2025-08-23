@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Products • Sales Reporting</title>
+  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+  <h1>Sales Reporting Analysis Dashboard</h1>
+  <div class="filters">
+    <form method="get">
+      {{ form.start_date }} {{ form.end_date }}
+      <button class="btn btn-primary" type="submit">Apply</button>
+      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
+      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
+    </form>
+  </div>
+</header>
+<div class="container">
+  <div class="grid kpis">
+    <div class="card"><div class="kpi"><div><div class="label badge">Total Revenue (Today)</div><div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div></div><div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Orders Today</div><div class="value">{{ kpis.orders.value }}</div></div><div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Active Customers</div><div class="value">{{ kpis.customers.value }}</div></div><div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Growth Rate</div><div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div></div><div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%</div></div></div>
+  </div>
+
+  <nav class="section-tabs">
+    <a href="{% url 'Sales:daily' %}">Daily</a>
+    <a href="{% url 'Sales:monthly' %}">Monthly</a>
+    <a href="{% url 'Sales:products' %}" class="active">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}">Customers</a>
+  </nav>
+
+  <div class="card">
+    <h3>Top Performing Products</h3>
+    <table class="table">
+      <thead><tr><th>#</th><th>Product</th><th>Units</th><th>Revenue</th><th>Rating</th></tr></thead>
+      <tbody>
+        {% for p in top_products %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ p.product__name }}</td>
+          <td>{{ p.units }}</td>
+          <td>₹ {{ p.revenue|floatformat:2 }}</td>
+          <td>{{ p.product__rating }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Category Performance Analysis</h3>
+    <table class="table">
+      <thead><tr><th>Category</th><th># Products</th><th>Revenue</th></tr></thead>
+      <tbody>
+        {% for c in categories %}
+        <tr>
+          <td>{{ c.name }}</td>
+          <td>{{ c.product_count|default:0 }}</td>
+          <td>₹ {{ c.revenue|default:0|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Order - Retail POS</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+
+  h2 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #007bff;
+    margin-bottom: 15px;
+  }
+
+  #reader {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border: 2px solid #007bff;
+  max-height: 50vh;       /* limit height to half viewport */
+  overflow: hidden;
+}
+
+body {
+  background: #f4f6f8;
+  color: #333;
+  padding: 10px;
+  overflow-y: auto;      /* allow scrolling */
+}
+
+  .table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+    padding-bottom: 100px; /* extra space for floating bar */
+}
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    background: #fff;
+    min-width: 350px;
+  }
+
+  th, td { padding: 10px; text-align: center; font-size: 14px; }
+  th { background: #007bff; color: #fff; font-weight: 600; }
+  tr:nth-child(even) { background: #f8f9fa; }
+  tr:hover { background: #e9f2ff; transition: 0.3s; }
+  td input.qty {
+    width: 50px;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 5px;
+    transition: 0.2s;
+  }
+
+  .btn-primary { background: #28a745; color: #fff; }
+  .btn-primary:hover { background: #1e7e34; transform: scale(1.05); }
+  .btn-danger { background: #dc3545; color: #fff; }
+  .btn-danger:hover { background: #a71d2a; transform: scale(1.05); }
+
+  .checkout-bar {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background: #fff;
+    padding: 15px 10px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    z-index: 100;
+  }
+
+  .checkout-bar span { font-size: 16px; font-weight: 700; color: #007bff; }
+
+  #checkoutModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center; align-items: center;
+    padding: 15px;
+    z-index: 200;
+  }
+
+  #checkoutModal .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  #checkoutModal input, #checkoutModal select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 12px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+  #checkoutModal button {
+    width: 48%;
+    margin-top: 5px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media(max-width: 500px){
+    th, td { font-size: 12px; padding: 6px; }
+    td input.qty { width: 40px; }
+    .checkout-bar { flex-direction: column; text-align: center; padding: 10px; }
+    .checkout-bar button { width: 100%; margin-top: 8px; }
+    #reader { max-width: 100%; }
+    #checkoutModal .modal-content { padding: 15px; }
+  }
+
+  @media(max-width: 500px){
+  #reader {
+    max-height: 40vh;     /* smaller on small phones */
+  }
+  .table-container {
+    max-height: 40vh;     /* table scrollable if needed */
+    overflow-y: auto;
+  }
+}
+
+@media(max-width: 500px){
+    .checkout-bar {
+        flex-direction: column;
+        text-align: center;
+        padding: 10px;
+    }
+    .checkout-bar button {
+        width: 100%;
+        margin-top: 8px;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<h2>🛒 Create Order</h2>
+
+<div class="scanner-table-wrapper" style="display:flex; flex-direction:column; gap:15px;">
+  <div id="reader"></div>
+  <div class="table-container">
+    <table id="cartTable">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="order-items"></tbody>
+  </table>
+</div>
+
+<div class="checkout-bar">
+  <span>Total: ₹<span id="grandTotal">0.00</span></span>
+  <div>
+    <button class="btn btn-primary" onclick="openCheckout()">Checkout</button>
+    <button class="btn btn-danger" onclick="clearCart()">Clear</button>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkoutModal">
+  <div class="modal-content">
+    <h3>Checkout</h3>
+    <input type="text" id="custName" placeholder="Customer Name (optional)">
+    <input type="text" id="custPhone" placeholder="Customer Phone (optional)">
+    <select id="paymentType">
+      <option value="cash">Cash</option>
+      <option value="upi">UPI</option>
+      <option value="card">Card</option>
+    </select>
+    <input type="date" id="orderDate">
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="generateInvoice()">Generate Bill</button>
+      <button class="btn btn-danger" onclick="closeCheckout()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden PDF Form -->
+<div style="display:none;">
+  <form id="invoiceForm" method="POST" action="/order/generate_invoice_pdf/">
+    <input type="hidden" name="customer_name" id="custNameInput">
+    <input type="hidden" name="customer_phone" id="custPhoneInput">
+    <input type="hidden" name="payment_type" id="paymentTypeInput">
+    <input type="hidden" name="date" id="orderDateInput">
+    <input type="hidden" name="items" id="itemsInput">
+    {% csrf_token %}
+  </form>
+</div>
+
+<script>
+function onScanSuccess(decodedText, decodedResult) {
+        fetch(`/order/add_to_order/?barcode=${decodedText}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              addProductToTable(data.item);
+            } else {
+              alert(data.error);
+            }
+          });
+      }
+
+      function addProductToTable(item) {
+        const tbody = document.getElementById("order-items");
+
+        // Check if product already exists in table
+        let existingRow = [...tbody.querySelectorAll("tr")].find(
+          (row) => row.dataset.id == item.barcode
+        );
+        if (existingRow) return; // already added, do not increment automatically
+
+        // Create new row
+        const row = document.createElement("tr");
+        row.dataset.barcode = item.barcode;
+row.innerHTML = `
+  <td>${item.product_name}</td>
+  <td><input type="number" class="qty" value="${item.quantity}" min="1"></td>
+  <td class="price">${item.product_price}</td>
+  <td class="line-total">${(item.product_price * item.quantity).toFixed(2)}</td>
+`;
+
+row.querySelector(".qty").addEventListener("input", updateTotals);
+tbody.appendChild(row);
+updateTotals();
+row.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+        // Update totals when user changes quantity
+        row.querySelector(".qty").addEventListener("input", updateTotals);
+
+        tbody.appendChild(row);
+        updateTotals();
+      }
+
+      function updateTotals() {
+        let total = 0;
+        document.querySelectorAll("#order-items tr").forEach((row) => {
+          const qty = parseInt(row.querySelector(".qty").value) || 0;
+          const price =
+            parseFloat(row.querySelector(".price").textContent) || 0;
+          const lineTotal = qty * price;
+          row.querySelector(".line-total").textContent = lineTotal.toFixed(2);
+          total += lineTotal;
+        });
+        document.getElementById("grandTotal").textContent = total.toFixed(2);
+      }
+
+      function clearCart() {
+        if (confirm("Clear all items from cart?")) {
+          fetch("/order/clear/") // clears session in backend
+            .then(() => {
+              document.querySelector("#order-items").innerHTML = "";
+              document.getElementById("grandTotal").textContent = "0.00";
+            });
+        }
+      }
+
+      // ----------------------
+      // Checkout modal
+      // ----------------------
+      function openCheckout() {
+        document.getElementById("orderDate").value = new Date()
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("checkoutModal").style.display = "flex";
+      }
+      function closeCheckout() {
+        document.getElementById("checkoutModal").style.display = "none";
+      }
+
+      // ----------------------
+      // PDF Invoice Generation
+      // ----------------------
+      function generateInvoice() {
+        //const items = [ {barcode: "8901063162914", quantity: 2, price: 100}, {barcode: "8901063162915", quantity: 1, price: 50}];
+        const name = document.getElementById("custName").value || null;
+        const phone = document.getElementById("custPhone").value || null;
+        const payment = document.getElementById("paymentType").value;
+        const date = document.getElementById("orderDate").value || new Date().toISOString();
+        
+
+    let items = [];
+document.querySelectorAll("#order-items tr").forEach((row) => {
+  items.push({
+    barcode: row.dataset.barcode, // now correctly set
+    name: row.cells[0].textContent,
+    quantity: parseInt(row.querySelector(".qty").value),
+    price: parseFloat(row.querySelector(".price").textContent)
+  });
+});
+
+
+console.log(items);
+
+    // Send data to backend
+    fetch("/order/save_order/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({
+            customer_name: name,
+            customer_phone: phone,
+            payment_type: payment,
+            date: date,
+            items: items,
+        }),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+        if(data.success){
+            alert("Order saved successfully!");
+            // Optional: clear cart
+            document.querySelector("#order-items").innerHTML = "";
+            document.getElementById("grandTotal").textContent = "0.00";
+            closeCheckout();
+        } else {
+            alert("Failed to save order.");
+        }
+    });
+
+        document.getElementById("custNameInput").value = name;
+        document.getElementById("custPhoneInput").value = phone;
+        document.getElementById("paymentTypeInput").value = payment;
+        document.getElementById("orderDateInput").value = date;
+        document.getElementById("itemsInput").value = JSON.stringify(items);
+
+        // Submit form in new tab to download PDF
+        // set hidden inputs ...
+        const form = document.getElementById("invoiceForm");
+        form.target = "_blank"; // important for download
+        form.submit();
+      }
+
+      // ----------------------
+      // CSRF Helper
+      // ----------------------
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      // ----------------------
+      // Init QR Scanner
+      // ----------------------
+      const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+        fps: 10,
+        qrbox: 250,
+      });
+      html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>

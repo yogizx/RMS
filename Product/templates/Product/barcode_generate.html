@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Barcode</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function toggleBarcodeGeneration() {
+      const generateBtn = document.getElementById('generateBtn');
+      const barcodeInput = document.getElementById('id_barcode_number');
+      if (document.getElementById('id_generate_barcode').checked) {
+        generateBtn.innerText = "Save & Generate Barcode";
+        barcodeInput.readOnly = true;
+        barcodeInput.value = "";
+      } else {
+        generateBtn.innerText = "Save Product";
+        barcodeInput.readOnly = false;
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 
+             bg-gradient-to-br from-indigo-100 via-white to-indigo-200">
+
+  <div class="w-full max-w-lg">
+    <!-- Header -->
+    <h2 class="text-4xl font-extrabold text-center mb-8 
+               bg-gradient-to-r from-indigo-600 to-purple-600 
+               bg-clip-text text-transparent">
+      🏷️ Generate Barcode
+    </h2>
+
+    <!-- Form Card -->
+    <form method="POST" enctype="multipart/form-data" 
+          action="{% url 'Product:generate_barcode' %}" 
+          class="bg-white/90 backdrop-blur-lg p-6 md:p-8 rounded-2xl shadow-xl space-y-5 border border-gray-100">
+      {% csrf_token %}
+
+      <!-- Product Name -->
+      <div>
+        <label for="id_name" class="block text-sm font-semibold text-gray-700 mb-1">Product Name</label>
+        <input type="text" name="name" id="id_name" 
+               value="{{ form.name.value|default:'' }}" 
+               required
+               class="w-full rounded-xl border border-gray-300 p-3 bg-gray-50 
+                      focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+
+      <!-- Price -->
+      <div>
+        <label for="id_price" class="block text-sm font-semibold text-gray-700 mb-1">Price</label>
+        <input type="number" name="price" id="id_price" step="0.01"
+               value="{{ form.price.value|default:'' }}" required
+               class="w-full rounded-xl border border-gray-300 p-3 bg-gray-50 
+                      focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+
+      <!-- Quantity + Unit -->
+      <div>
+        <label for="id_quantity" class="block text-sm font-semibold text-gray-700 mb-1">Quantity</label>
+        <div class="flex gap-3">
+          <input type="number" name="quantity" id="id_quantity" step="0.01"
+                 value="{{ form.quantity.value|default:'' }}" required
+                 class="flex-1 rounded-xl border border-gray-300 p-3 bg-gray-50 
+                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <select name="unit" id="id_unit"
+                  class="w-32 rounded-xl border border-gray-300 p-3 bg-gray-50 
+                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="Gram" {% if form.unit.value == "Gram" %}selected{% endif %}>Gram</option>
+            <option value="Kg" {% if form.unit.value == "Kg" %}selected{% endif %}>Kg</option>
+            <option value="Liter" {% if form.unit.value == "Liter" %}selected{% endif %}>Liter</option>
+            <option value="Piece" {% if form.unit.value == "Piece" %}selected{% endif %}>Piece</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="id_description" class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+        <textarea name="description" id="id_description" rows="3" 
+                  class="w-full rounded-xl border border-gray-300 p-3 bg-gray-50 
+                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Optional description">{{ form.description.value|default:'' }}</textarea>
+      </div>
+
+      <!-- Barcode Upload -->
+      <div>
+        <label for="id_barcode_image" class="block text-sm font-semibold text-gray-700 mb-1">Upload Barcode Image (Optional)</label>
+        <input type="file" name="barcode_image" id="id_barcode_image" accept="image/*"
+               class="w-full rounded-xl border border-gray-300 p-2 bg-gray-50">
+      </div>
+
+      <!-- Barcode Number -->
+      <div>
+        <label for="id_barcode_number" class="block text-sm font-semibold text-gray-700 mb-1">Barcode Number (Optional)</label>
+        <input type="text" name="barcode_number" id="id_barcode_number" 
+               placeholder="Enter barcode number manually"
+               value="{{ form.barcode_number.value|default:'' }}"
+               class="w-full rounded-xl border border-gray-300 p-3 bg-gray-50 
+                      focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+
+      <!-- Generate Automatically -->
+      <div class="flex items-center gap-2">
+        <input type="checkbox" name="generate_barcode" id="id_generate_barcode" 
+               onchange="toggleBarcodeGeneration()"
+               class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+        <label for="id_generate_barcode" class="text-sm text-gray-700 font-medium">Generate Barcode Automatically</label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-3">
+        <button type="submit" id="generateBtn"
+                class="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-xl font-semibold 
+                       shadow-md hover:bg-indigo-500 transition">
+          Save Product
+        </button>
+        <a href="{% url 'Product:product_list' %}"
+           class="flex-1 bg-gray-100 text-gray-800 px-4 py-3 rounded-xl font-semibold text-center 
+                  shadow-sm hover:bg-gray-200 transition">
+          View Products
+        </a>
+      </div>
+    </form>
+
+    <!-- Verify Barcode -->
+    <div class="text-center mt-6">
+      <a href="{% url 'Product:barcode_verify' %}"
+         class="inline-flex items-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-xl 
+                font-semibold shadow-md hover:bg-yellow-400 transition">
+        📷 Verify Barcode
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function toggleBarcodeGeneration() {
+      const generateBtn = document.getElementById('generateBtn');
+      const barcodeInput = document.getElementById('id_barcode_number');
+      if (document.getElementById('id_generate_barcode').checked) {
+          generateBtn.innerText = "Save Product & Generate Barcode";
+          barcodeInput.readOnly = true;
+          barcodeInput.value = "";
+      } else {
+          generateBtn.innerText = "Save Product";
+          barcodeInput.readOnly = false;
+      }
+    }
+  </script>
+</body>
+
+</html>

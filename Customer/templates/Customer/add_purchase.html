@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Purchase</title>
+    <link rel="stylesheet" href="{% static 'Customer/css/add_purchase.css' %}">
+    <style>
+        /* Reset and base styles */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #001f3f;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-left {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-right a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: 500;
+        }
+
+        .navbar-right a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hamburger Menu (Mobile) */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 4px 0;
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            background-color: #001f3f;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            width: 100%;
+        }
+
+        .mobile-menu a {
+            padding: 10px 20px;
+            border-top: 1px solid #003366;
+        }
+
+        /* Container */
+        .container {
+            max-width: 500px;
+            margin: 100px auto 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #001f3f;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form input, form select {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px;
+            background-color: #001f3f;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #003366;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .links a {
+            color: #001f3f;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-right {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-left">Retail Pro</div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="container">
+        <h2>Add Purchase</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Purchase</button>
+        </form>
+        <div class="links">
+            <p>
+                New Customer <a href="{% url 'Customer:add_customer' %}">Click Here</a> |
+                Customer Details <a href="{% url 'Customer:customer_list' %}">Click Here</a>
+            </p>
+        </div>
+    </div>
+    </script>
+</body>
+</html>

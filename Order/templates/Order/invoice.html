@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f8f9fa; }
+        .container { max-width:700px; margin:20px auto; background:white; padding:20px; border-radius:8px; }
+        table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+        th { background:#343a40; color:white; }
+        h2 { text-align:center; }
+        .total { text-align:right; font-weight:bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Invoice No: {{ invoice_number }}</h2>
+
+        {% if customer_name %}
+        <p><strong>Customer:</strong> {{ customer_name }}</p>
+        {% endif %}
+        {% if customer_phone %}
+        <p><strong>Phone:</strong> {{ customer_phone }}</p>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th><th>Qty</th><th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order_items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="total">Total: ₹{{ total }}</p>
+        <p><strong>Payment Method:</strong> {{ payment_method|title }}</p>
+
+        {% if payment_method == "upi" and qr_code %}
+        <p><strong>Scan to Pay:</strong></p>
+        <img src="data:image/png;base64,{{ qr_code }}" width="200">
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchases</title>
+    <link rel="stylesheet" href="{% static 'Customer/css/customer_list.css' %}">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #001f3f;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-left {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+        .navbar-right a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .navbar-right a:hover {
+            color: #ffcc00;
+        }
+
+        /* Container */
+        .container {
+            margin: 90px auto 30px auto;
+            max-width: 95%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #001f3f;
+        }
+
+        /* Table Wrapper for Mobile */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px; /* Ensures horizontal scroll on small screens */
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #001f3f;
+            color: white;
+            white-space: nowrap;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #888;
+        }
+
+        /* Buttons */
+        .delete-btn {
+            background: #ff4d4d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .delete-btn:hover {
+            background: #cc0000;
+        }
+        .add-btn {
+            display: block;
+            width: fit-content;
+            margin: 20px auto 0 auto;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .add-btn:hover {
+            background: #218838;
+        }
+
+        /* Mobile Specific Adjustments */
+        @media (max-width: 768px) {
+            .navbar-right { display: none; }
+            .container { padding: 10px; }
+            table, th, td { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-left">Retail Pro</div>
+    </div>
+
+    <!-- Content -->
+    <div class="container">
+        <h2>Purchases</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Qty × Price</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in purchases %}
+                        <tr>
+                            <td>{{ purchase.customer.name }}</td>
+                            <td>{{ purchase.product }}</td>
+                            <td>{{ purchase.quantity }} × ₹{{ purchase.price }}</td>
+                            <td>₹{{ purchase.total_amount }}</td>
+                            <td>{{ purchase.date|date:"d M Y, h:i A" }}</td>
+                            <td>
+                                <a href="{% url 'delete_purchase' purchase.id %}" class="delete-btn"
+                                   onclick="return confirm('Are you sure you want to delete this purchase?');">Delete</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="no-data">No purchases found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <a href="{% url 'Customer:add_purchase' %}" class="add-btn">+ Add Purchase</a>
+    </div>
+</body>
+</html>

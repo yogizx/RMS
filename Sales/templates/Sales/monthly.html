@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Monthly • Sales Reporting</title>
+  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+  <h1>Sales Reporting Analysis Dashboard</h1>
+  <div class="filters">
+    <form method="get">
+      {{ form.start_date }} {{ form.end_date }}
+      <button class="btn btn-primary" type="submit">Apply</button>
+      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
+      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
+    </form>
+  </div>
+</header>
+<div class="container">
+  <div class="grid kpis">
+    <div class="card"><div class="kpi"><div><div class="label badge">Total Revenue (Today)</div><div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div></div><div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Orders Today</div><div class="value">{{ kpis.orders.value }}</div></div><div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Active Customers</div><div class="value">{{ kpis.customers.value }}</div></div><div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Growth Rate</div><div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div></div><div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%</div></div></div>
+  </div>
+
+  <nav class="section-tabs">
+    <a href="{% url 'Sales:daily' %}">Daily</a>
+    <a href="{% url 'Sales:monthly' %}" class="active">Monthly</a>
+    <a href="{% url 'Sales:products' %}">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}">Customers</a>
+  </nav>
+
+  <div class="grid" style="grid-template-columns: 2fr 1fr;">
+    <div class="card">
+      <h3>Monthly Revenue Trend (12 month overview)</h3>
+      <div class="chart-box">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Sales by Category (distribution)</h3>
+      <div class="chart-box">
+        <canvas id="catChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Key Performance Metrics (Monthly Comparison)</h3>
+    <p>This Month: <span class="badge">₹ {{ perf.this_month|floatformat:2 }}</span> &nbsp; 
+       Last Month: <span class="badge">₹ {{ perf.last_month|floatformat:2 }}</span> &nbsp;
+       Difference: <span class="badge" style="color:{% if perf.diff >= 0 %}#7CFFB2{% else %}#FFA6A6{% endif %}">{% if perf.diff >= 0 %}+{% endif %}{{ perf.diff }}%</span>
+    </p>
+  </div>
+</div>
+
+<script>
+const months = {{ months|safe }};
+const revs = {{ revs|safe }};
+const catLabels = {{ cat_labels|safe }};
+const catData = {{ cat_data|safe }};
+
+new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+  type: 'bar',
+  data: { labels: months, datasets: [{ label: 'Revenue', data: revs }] },
+  options: { responsive:true, maintainAspectRatio:false }
+});
+
+new Chart(document.getElementById('catChart').getContext('2d'), {
+  type: 'pie',
+  data: { labels: catLabels, datasets: [{ data: catData }] },
+  options: { responsive:true, maintainAspectRatio:false }
+});
+</script>
+</body>
+</html>

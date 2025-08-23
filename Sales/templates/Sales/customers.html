@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Customers • Sales Reporting</title>
+  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+</head>
+<body>
+<header>
+  <h1>Sales Reporting Analysis Dashboard</h1>
+  <div class="filters">
+    <form method="get">
+      {{ form.start_date }} {{ form.end_date }}
+      <button class="btn btn-primary" type="submit">Apply</button>
+      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
+      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
+    </form>
+  </div>
+</header>
+<div class="container">
+  <div class="grid kpis">
+    <div class="card"><div class="kpi"><div><div class="label badge">Total Revenue (Today)</div><div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div></div><div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Orders Today</div><div class="value">{{ kpis.orders.value }}</div></div><div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Active Customers</div><div class="value">{{ kpis.customers.value }}</div></div><div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%</div></div></div>
+    <div class="card"><div class="kpi"><div><div class="label badge">Growth Rate</div><div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div></div><div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%</div></div></div>
+  </div>
+
+  <nav class="section-tabs">
+    <a href="{% url 'Sales:daily' %}">Daily</a>
+    <a href="{% url 'Sales:monthly' %}">Monthly</a>
+    <a href="{% url 'Sales:products' %}">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}" class="active">Customers</a>
+  </nav>
+
+  <div class="card">
+    <h3>Top Value Customers</h3>
+    <table class="table">
+      <thead><tr><th>#</th><th>Name</th><th>Joined</th><th>Orders</th><th>Total Spent</th></tr></thead>
+      <tbody>
+        {% for c in top_customers %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ c.customer__name }}</td>
+          <td>{{ c.customer__joined_at }}</td>
+          <td>{{ c.orders }}</td>
+          <td>₹ {{ c.spent|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid" style="grid-template-columns: repeat(3,1fr)">
+    <div class="card"><h3>New Customers (7d)</h3><div class="value">{{ activity.new_customers }}</div></div>
+    <div class="card"><h3>Regular Purchases (30d)</h3><div class="value">{{ activity.regular_purchases }}</div></div>
+    <div class="card"><h3>Inactive (90d)</h3><div class="value">{{ activity.inactive_90d }}</div></div>
+  </div>
+</div>
+</body>
+</html>

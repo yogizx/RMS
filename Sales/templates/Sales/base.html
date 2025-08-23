@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Reporting Analysis Dashboard</title>
+  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+  <h1>Sales Reporting Analysis Dashboard</h1>
+  <div class="filters">
+    <form method="get">
+      {{ form.start_date }} {{ form.end_date }}
+      <button class="btn btn-primary" type="submit">Apply</button>
+      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
+      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
+    </form>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid kpis">
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Total Revenue (Today)</div>
+          <div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div>
+        </div>
+        <div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}% vs yesterday
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Orders Today</div>
+          <div class="value">{{ kpis.orders.value }}</div>
+        </div>
+        <div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Active Customers</div>
+          <div class="value">{{ kpis.customers.value }}</div>
+        </div>
+        <div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Growth Rate</div>
+          <div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div>
+        </div>
+        <div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="section-tabs">
+    <a href="{% url 'Sales:daily' %}" class="{% if section == 'daily' %}active{% endif %}">Daily</a>
+    <a href="{% url 'Sales:monthly' %}" class="{% if section == 'monthly' %}active{% endif %}">Monthly</a>
+    <a href="{% url 'Sales:products' %}" class="{% if section == 'products' %}active{% endif %}">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}" class="{% if section == 'top_sellers' %}active{% endif %}">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}" class="{% if section == 'customers' %}active{% endif %}">Customers</a>
+  </nav>
+
+  <div class="card">
+    <h3>Welcome</h3>
+    <p>Select any tab above to view detailed analytics.</p>
+  </div>
+</div>
+
+<footer>© {{ now|default:'' }} Sales Reporting</footer>
+<script src="{% static 'Sales/js/dashboard.js' %}"></script>
+</body>
+</html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Reporting Analysis Dashboard</title>
+  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+  <h1>Sales Reporting Analysis Dashboard</h1>
+  <div class="filters">
+    <form method="get">
+      {{ form.start_date }} {{ form.end_date }}
+      <button class="btn btn-primary" type="submit">Apply</button>
+      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
+      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
+    </form>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid kpis">
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Total Revenue (Today)</div>
+          <div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div>
+        </div>
+        <div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}% vs yesterday
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Orders Today</div>
+          <div class="value">{{ kpis.orders.value }}</div>
+        </div>
+        <div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Active Customers</div>
+          <div class="value">{{ kpis.customers.value }}</div>
+        </div>
+        <div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div>
+          <div class="label badge">Growth Rate</div>
+          <div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div>
+        </div>
+        <div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">
+          {% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="section-tabs">
+    <a href="{% url 'Sales:daily' %}" class="{% if section == 'daily' %}active{% endif %}">Daily</a>
+    <a href="{% url 'Sales:monthly' %}" class="{% if section == 'monthly' %}active{% endif %}">Monthly</a>
+    <a href="{% url 'Sales:products' %}" class="{% if section == 'products' %}active{% endif %}">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}" class="{% if section == 'top_sellers' %}active{% endif %}">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}" class="{% if section == 'customers' %}active{% endif %}">Customers</a>
+  </nav>
+
+  <div class="card">
+    <h3>Welcome</h3>
+    <p>Select any tab above to view detailed analytics.</p>
+  </div>
+</div>
+
+<footer>© {{ now|default:'' }} Sales Reporting</footer>
+<script src="{% static 'Sales/js/dashboard.js' %}"></script>
+</body>
+</html>

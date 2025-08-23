@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Barcode</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+
+        video { 
+            width: 400px; max-width: 80%; margin-top: 20px;
+            border: 3px solid #007bff; border-radius: 10px; background: black;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        #upload-area {
+            margin: 25px auto;
+            padding: 20px;
+            width: 400px; max-width: 80%;
+            border: 2px dashed #007bff;
+            border-radius: 12px;
+            background: #ffffffaa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #upload-area:hover {
+            background: #007bff11;
+            transform: scale(1.02);
+        }
+        #upload-label {
+            font-size: 16px;
+            color: #007bff;
+            font-weight: bold;
+        }
+        #upload {
+            display: none;
+        }
+
+        button {
+            margin-top: 15px; padding: 10px 18px; border-radius: 8px;
+            border: none; background: #28a745; color: white; cursor: pointer;
+            font-size: 15px; font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        button:hover { background: #218838; }
+
+        .add-product-btn {
+            background-color: #007bff;
+            margin-top: 12px;
+        }
+        .add-product-btn:hover { background-color: #0056b3; }
+
+        #result { margin-top: 15px; font-size: 18px; font-weight: bold; }
+        #error { color: red; margin-top: 15px; }
+        .product-details {
+            margin-top: 20px; padding: 15px; border: 1px solid #ccc;
+            background: #fff; border-radius: 10px; width: 80%; max-width: 400px;
+            margin-left: auto; margin-right: auto; text-align: left;
+            box-shadow: 0px 6px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>📷 Verify Barcode</h1>
+
+    <video id="video" autoplay playsinline></video>
+
+    <!-- Modern Upload UI -->
+    <div id="upload-area" onclick="document.getElementById('upload').click()">
+        <input type="file" id="upload" accept="image/*">
+        <p id="upload-label">📂 Click or Drag & Drop to Upload Barcode Image</p>
+    </div>
+
+    <button onclick="decodeUpload()">🔍 Scan Uploaded Image</button>
+
+    <div id="result">Initializing camera...</div>
+    <div id="error"></div>
+    <div id="product-info"></div>
+
+
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <script>
+        const hints = new Map();
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, Object.values(ZXing.BarcodeFormat));
+
+        const codeReader = new ZXing.BrowserBarcodeReader(hints);
+        let lastBarcode = "";
+        let scanning = true;
+
+        async function startScanning() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoInputDevices = devices.filter(d => d.kind === 'videoinput');
+                if (!videoInputDevices.length) {
+                    document.getElementById("error").innerText = "No camera detected on this device.";
+                    return;
+                }
+
+                const selectedDeviceId = videoInputDevices[0].deviceId;
+
+                codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', async (result, err) => {
+                    if (!scanning) return;
+
+                    if (result && result.text.trim() !== lastBarcode) {
+                        lastBarcode = result.text.trim();
+                        await displayProduct(lastBarcode);
+                    } else if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.error(err);
+                    }
+                });
+
+            } catch (error) {
+                document.getElementById("error").innerText = "Camera access denied or not available.";
+                console.error(error);
+            }
+        }
+
+        function decodeUpload() {
+            document.getElementById("error").innerText = "";
+            document.getElementById("result").innerText = "⏳ Scanning uploaded image...";
+
+            const fileInput = document.getElementById("upload");
+            const file = fileInput.files[0];
+            if (!file) {
+                document.getElementById("error").innerText = "Please select an image file.";
+                return;
+            }
+
+            const imageUrl = URL.createObjectURL(file);
+            codeReader.decodeFromImageUrl(imageUrl)
+                .then(result => {
+                    lastBarcode = result.text.trim();
+                    displayProduct(lastBarcode);
+                })
+                .catch(err => {
+                    document.getElementById("error").innerText = "❌ Barcode not found in the uploaded image.";
+                    document.getElementById("result").innerText = "";
+                    console.error("Upload scan error:", err);
+                });
+        }
+
+        async function displayProduct(barcode) {
+            scanning = false;
+            document.getElementById('result').innerText = `✅ Detected: ${barcode}`;
+            const infoDiv = document.getElementById('product-info');
+            infoDiv.innerHTML = "<p>⏳ Retrieving product info...</p>";
+
+            try {
+                const verifyUrl = "{% url 'Product:verify_barcode_data' %}";
+                const response = await fetch(`${verifyUrl}?barcode=${encodeURIComponent(barcode)}`);
+                const data = await response.json();
+
+                if (data.found) {
+                    infoDiv.innerHTML = `
+                        <div class="product-details">
+                            <p><strong>Name:</strong> ${data.name || '-'}</p>
+                            <p><strong>Quantity:</strong> ${data.quantity || '-'}</p>
+                            <p><strong>Price:</strong> ₹${data.price || '-'}</p>
+                            <p><strong>Description:</strong> ${data.description || 'No description'}</p>
+                            ${data.barcode_image ? `<img src="${data.barcode_image}" alt="Barcode Image" style="max-width:100%; margin-top:10px; border-radius:8px; box-shadow:0px 4px 10px rgba(0,0,0,0.15);">` : ''}
+                        </div>
+                    `;
+                } else {
+                    infoDiv.innerHTML = `
+                        <p style="color:red; font-weight:600;">❌ Product not found.</p>
+                        <a href="/add_product/?barcode=${barcode}" class="add-product-btn">➕ Add New Product</a>
+                    `;
+                    // Retry scanning after 2 seconds
+                    setTimeout(() => { scanning = true; }, 2000);
+                }
+            } catch (err) {
+                document.getElementById("error").innerText = "Error retrieving product information.";
+                console.error(err);
+                setTimeout(() => { scanning = true; }, 2000);
+            }
+        }
+
+        startScanning();
+
+        // drag & drop file handler
+        const uploadArea = document.getElementById("upload-area");
+        const uploadInput = document.getElementById("upload");
+
+        uploadArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            uploadArea.style.background = "#007bff22";
+        });
+
+        uploadArea.addEventListener("dragleave", () => {
+            uploadArea.style.background = "#ffffffaa";
+        });
+
+        uploadArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            uploadInput.files = e.dataTransfer.files;
+            uploadArea.style.background = "#ffffffaa";
+            document.getElementById("upload-label").innerText = "✅ File Ready: " + uploadInput.files[0].name;
+        });
+    </script>
+</body>
+</html>

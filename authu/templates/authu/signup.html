@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup</title>
+     <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+    
+</head>
+<body>
+    <div class="container">
+        <h2>Create Account</h2>
+        {% for message in messages %}
+            <div class="error-message">{{ message }}</div>
+        {% endfor %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Enter Username" required>
+            <input type="text" name="storename" placeholder="Enter Storename" required>
+            <input type="text" name="phonenumber" placeholder="Enter Phonenumber" required>
+            <input type="password" name="password" placeholder="Enter Password" required>
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    </div>
+</body>
+</html>
+</body>
+</html>

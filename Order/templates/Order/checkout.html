@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cart Checkout</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f8f9fa; }
+        .container { max-width:900px; margin:40px auto; background:white; padding:20px; border-radius:8px; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+        th { background:#343a40; color:white; }
+        .total { text-align:right; font-weight:bold; margin-top:15px; }
+        input[type=number] { width:60px; text-align:center; }
+        .btn { padding:10px 20px; margin-top:15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; }
+        .btn:hover { background:#218838; }
+        #checkoutForm, #invoice { display:none; margin-top:20px; }
+        .invoice-box { border:1px solid #ccc; padding:20px; border-radius:8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🛒 Your Cart</h2>
+    <table id="cartTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price (₹)</th>
+                <th>Qty</th>
+                <th>Amount (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Marie Gold Biscuit</td>
+                <td class="price">10</td>
+                <td><input type="number" class="qty" value="2" min="1"></td>
+                <td class="line-total">20</td>
+            </tr>
+            <tr>
+                <td>Parle G Biscuit</td>
+                <td class="price">5</td>
+                <td><input type="number" class="qty" value="3" min="1"></td>
+                <td class="line-total">15</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="total">Total: ₹<span id="grandTotal">35</span></p>
+    <button class="btn" onclick="showCheckout()">Checkout</button>
+
+    <!-- Checkout Form -->
+    <div id="checkoutForm">
+        <h3>🧾 Checkout</h3>
+        <label>Customer Name: <input type="text" id="custName"></label><br><br>
+        <label>Phone Number: <input type="text" id="custPhone"></label><br><br>
+        <label>Payment Type: 
+            <select id="paymentType">
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="UPI">UPI</option>
+            </select>
+        </label><br><br>
+        <button class="btn" onclick="generateInvoice()">Generate Invoice</button>
+    </div>
+
+    <!-- Invoice Section -->
+    <div id="invoice" class="invoice-box"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+function updateTotals() {
+    let grandTotal = 0;
+    document.querySelectorAll("#cartTable tbody tr").forEach(row => {
+        let price = parseFloat(row.querySelector(".price").textContent);
+        let qty = parseInt(row.querySelector(".qty").value) || 1;
+        let lineTotal = price * qty;
+
+        row.querySelector(".line-total").textContent = lineTotal.toFixed(2);
+        grandTotal += lineTotal;
+    });
+    document.getElementById("grandTotal").textContent = grandTotal.toFixed(2);
+}
+
+// Attach listeners
+document.querySelectorAll(".qty").forEach(input => {
+    input.addEventListener("input", updateTotals);
+});
+updateTotals();
+
+function showCheckout() {
+    document.getElementById("checkoutForm").style.display = "block";
+}
+
+function generateInvoice() {
+    let custName = document.getElementById("custName").value || "N/A";
+    let custPhone = document.getElementById("custPhone").value || "N/A";
+    let paymentType = document.getElementById("paymentType").value;
+    let invoiceNo = "INV-" + new Date().getTime();
+    let date = new Date().toLocaleString();
+
+    let tableHTML = "<table><tr><th>Product</th><th>Price</th><th>Qty</th><th>Amount</th></tr>";
+    let grandTotal = 0;
+    document.querySelectorAll("#cartTable tbody tr").forEach(row => {
+        let product = row.cells[0].textContent;
+        let price = parseFloat(row.querySelector(".price").textContent);
+        let qty = parseInt(row.querySelector(".qty").value);
+        let amount = price * qty;
+        grandTotal += amount;
+        tableHTML += `<tr><td>${product}</td><td>₹${price}</td><td>${qty}</td><td>₹${amount.toFixed(2)}</td></tr>`;
+    });
+    tableHTML += `</table><p class="total">Grand Total: ₹${grandTotal.toFixed(2)}</p>`;
+
+    let invoiceHTML = `
+        <h3>Invoice</h3>
+        <p><b>Invoice No:</b> ${invoiceNo}</p>
+        <p><b>Date:</b> ${date}</p>
+        <p><b>Customer:</b> ${custName}</p>
+        <p><b>Phone:</b> ${custPhone}</p>
+        <p><b>Payment Type:</b> ${paymentType}</p>
+        ${tableHTML}
+    `;
+
+    document.getElementById("invoice").innerHTML = invoiceHTML;
+    document.getElementById("invoice").style.display = "block";
+
+    // If payment type is UPI, generate QR code
+    if (paymentType === "UPI") {
+        let upiString = "upi://pay?pa=merchant@upi&pn=Shop&am=" + grandTotal.toFixed(2);
+        QRCode.toDataURL(upiString, function (err, url) {
+            if (!err) {
+                document.getElementById("invoice").innerHTML += `<p><b>Scan to Pay:</b></p><img src="${url}" width="150">`;
+            }
+        });
+    }
+}
+</script>
+</body>
+</html>
