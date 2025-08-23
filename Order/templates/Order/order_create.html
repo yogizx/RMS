@@ -132,6 +132,11 @@ body {
     margin-top: 5px;
   }
 
+  .remove-item:hover {
+    transform: scale(1.2);
+    color: darkred;
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -184,6 +189,7 @@ body {
         <th>Qty</th>
         <th>Price</th>
         <th>Total</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody id="order-items"></tbody>
@@ -259,12 +265,22 @@ row.innerHTML = `
   <td><input type="number" class="qty" value="${item.quantity}" min="1"></td>
   <td class="price">${item.product_price}</td>
   <td class="line-total">${(item.product_price * item.quantity).toFixed(2)}</td>
+  <td><span class="remove-item" style="cursor:pointer; color:red; font-size:18px;">🗑</span></td>
 `;
 
 row.querySelector(".qty").addEventListener("input", updateTotals);
 tbody.appendChild(row);
-updateTotals();
-row.scrollIntoView({ behavior: 'smooth', block: 'end' });
+row.querySelector(".remove-item").addEventListener("click", function () {
+    if (confirm("Remove this item?")) {
+        fetch(`/order/remove_item/?barcode=${item.barcode}`)
+          .then(() => {
+            row.remove();
+            updateTotals();
+            row.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          });
+    }
+});
+
 
         // Update totals when user changes quantity
         row.querySelector(".qty").addEventListener("input", updateTotals);
