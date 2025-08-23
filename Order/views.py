@@ -110,6 +110,14 @@ def update_quantity(request):
         request.session["cart"] = cart
     return JsonResponse({"success": True})
 
+def remove_item(request):
+    barcode = request.GET.get("barcode")
+    cart = request.session.get("cart", {})
+    if barcode in cart:
+        del cart[barcode]
+        request.session["cart"] = cart
+    return JsonResponse({"success": True})
+
 @csrf_exempt  # temporary to test PDF generation
 def generate_invoice_pdf(request):
     if request.method == "POST":
