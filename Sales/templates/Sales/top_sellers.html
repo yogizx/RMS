@@ -1,63 +1,147 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Top Sellers • Sales Reporting</title>
-  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products • Sales Reporting</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
-<header>
-  <h1>Sales Reporting Analysis Dashboard</h1>
-  <div class="filters">
-    <form method="get">
-      {{ form.start_date }} {{ form.end_date }}
-      <button class="btn btn-primary" type="submit">Apply</button>
-      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
-      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
-    </form>
+<body class="bg-gray-50 font-sans antialiased">
+
+<!-- Header -->
+<header class="bg-white shadow p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+  <h1 class="text-2xl font-bold text-indigo-600">Products Dashboard</h1>
+
+  <!-- Export Buttons -->
+  <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    <a href="{% url 'Sales:export_csv' %}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400 flex items-center justify-center">
+      <i class="fas fa-file-csv mr-2"></i> CSV
+    </a>
+    <a href="{% url 'Sales:export_json' %}" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 flex items-center justify-center">
+      <i class="fas fa-file-code mr-2"></i> JSON
+    </a>
   </div>
 </header>
-<div class="container">
-  <div class="grid kpis">
-    <div class="card"><div class="kpi"><div><div class="label badge">Total Revenue (Today)</div><div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div></div><div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Orders Today</div><div class="value">{{ kpis.orders.value }}</div></div><div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Active Customers</div><div class="value">{{ kpis.customers.value }}</div></div><div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Growth Rate</div><div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div></div><div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%</div></div></div>
+
+<main class="container mx-auto p-4 space-y-6">
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Total Revenue</span>
+        <i class="fas fa-coins text-indigo-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">₹ 120,000</div>
+      <div class="mt-1 text-green-500">+12%</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Orders</span>
+        <i class="fas fa-shopping-cart text-pink-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">950</div>
+      <div class="mt-1 text-green-500">+8%</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Active Customers</span>
+        <i class="fas fa-users text-yellow-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">620</div>
+      <div class="mt-1 text-red-500">-3%</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Growth Rate</span>
+        <i class="fas fa-chart-line text-green-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">₹ 10,500</div>
+      <div class="mt-1 text-green-500">+5%</div>
+    </div>
   </div>
 
-  <nav class="section-tabs">
-    <a href="{% url 'Sales:daily' %}">Daily</a>
-    <a href="{% url 'Sales:monthly' %}">Monthly</a>
-    <a href="{% url 'Sales:products' %}">Products</a>
-    <a href="{% url 'Sales:top_sellers' %}" class="active">Top Sellers</a>
-    <a href="{% url 'Sales:customers' %}">Customers</a>
+  <!-- Tabs -->
+  <nav class="flex flex-wrap gap-2 bg-gray-100 p-2 rounded-lg">
+    <a href="{% url 'Sales:daliy' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Daily</a>
+    <a href="{% url 'Sales:monthly' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Monthly</a>
+    <a href="{% url 'Sales:products' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Products</a>
+    <a href="{% url 'Sales:customers' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Customers</a>
+    <a href="#" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Top Sellers</a>
   </nav>
 
-  <div class="card">
-    <h3>Best Selling Products</h3>
-    <table class="table">
-      <thead><tr><th>#</th><th>Name</th><th>Category</th><th>Units</th><th>Revenue</th><th>Rating</th></tr></thead>
-      <tbody>
-        {% for p in best_sellers %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ p.product__name }}</td>
-          <td>{{ p.product__category__name }}</td>
-          <td>{{ p.units }}</td>
-          <td>₹ {{ p.revenue|floatformat:2 }}</td>
-          <td>{{ p.product__rating }}</td>
+  <!-- Top Products Table -->
+  <div class="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+    <h3 class="text-xl font-semibold mb-4">Top Performing Products</h3>
+    <table class="min-w-full text-left border-collapse table-auto">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="px-4 py-2 border">#</th>
+          <th class="px-4 py-2 border">Product</th>
+          <th class="px-4 py-2 border">Units</th>
+          <th class="px-4 py-2 border">Revenue</th>
+          <th class="px-4 py-2 border">Rating</th>
         </tr>
-        {% endfor %}
+      </thead>
+      <tbody>
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border">1</td>
+          <td class="px-4 py-2 border">Smartphone</td>
+          <td class="px-4 py-2 border">450</td>
+          <td class="px-4 py-2 border">₹ 4,50,000</td>
+          <td class="px-4 py-2 border">4.8</td>
+        </tr>
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border">2</td>
+          <td class="px-4 py-2 border">Headphones</td>
+          <td class="px-4 py-2 border">320</td>
+          <td class="px-4 py-2 border">₹ 1,60,000</td>
+          <td class="px-4 py-2 border">4.6</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="grid" style="grid-template-columns: repeat(3,1fr)">
-    <div class="card"><h3>Quick Insights</h3><p>Top performer by units: <span class="badge">{% firstof best_sellers.0.product__name '—' %}</span></p></div>
-    <div class="card"><h3>Stock Alert</h3><p>Consider reordering items with stock &lt; 10.</p></div>
-    <div class="card"><h3>Highest Rated</h3><p>⭐ Check products with rating ≥ 4.5 for promotions.</p></div>
+  <!-- Top Categories Performance Chart -->
+  <div class="bg-white p-6 rounded-2xl shadow">
+    <h3 class="text-xl font-semibold mb-4">Top Categories Performance</h3>
+    <div class="relative w-full h-64 sm:h-80">
+      <canvas id="categoriesChart"></canvas>
+    </div>
   </div>
-</div>
+
+</main>
+
+<footer class="text-center text-sm text-gray-500 p-4 mt-6">© 2025 Sales Reporting</footer>
+
+<script>
+// Dummy Data for Top Categories Performance
+const categoryLabels = ['Electronics', 'Clothing', 'Groceries', 'Furniture', 'Toys'];
+const categoryData = [45, 25, 15, 10, 5];
+
+new Chart(document.getElementById('categoriesChart').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: categoryLabels,
+    datasets: [{
+      label: 'Sales Share (%)',
+      data: categoryData,
+      backgroundColor: ['#6366F1','#EC4899','#F59E0B','#10B981','#3B82F6'],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' }
+    }
+  }
+});
+</script>
+
 </body>
 </html>
