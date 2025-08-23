@@ -1,81 +1,127 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monthly • Sales Reporting</title>
-  <link rel="stylesheet" href="{% static 'Sales/css/styles.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
-<header>
-  <h1>Sales Reporting Analysis Dashboard</h1>
-  <div class="filters">
-    <form method="get">
-      {{ form.start_date }} {{ form.end_date }}
-      <button class="btn btn-primary" type="submit">Apply</button>
-      <a class="btn" href="{% url 'Sales:export_csv' %}">Export CSV</a>
-      <a class="btn" href="{% url 'Sales:export_json' %}">Export JSON</a>
-    </form>
+<body class="bg-gray-50 font-sans antialiased">
+
+<!-- Header -->
+<header class="bg-white shadow p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+  <h1 class="text-2xl font-bold text-indigo-600">Monthly Sales Dashboard</h1>
+
+  <!-- Export Buttons -->
+  <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    <a href="{% url 'Sales:export_csv' %}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400 flex items-center justify-center">
+      <i class="fas fa-file-csv mr-2"></i> CSV
+    </a>
+    <a href="{% url 'Sales:export_json' %}" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 flex items-center justify-center">
+      <i class="fas fa-file-code mr-2"></i> JSON
+    </a>
   </div>
 </header>
-<div class="container">
-  <div class="grid kpis">
-    <div class="card"><div class="kpi"><div><div class="label badge">Total Revenue (Today)</div><div class="value">₹ {{ kpis.revenue.value|floatformat:2 }}</div></div><div class="diff {% if kpis.revenue.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.revenue.diff >= 0 %}+{% endif %}{{ kpis.revenue.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Orders Today</div><div class="value">{{ kpis.orders.value }}</div></div><div class="diff {% if kpis.orders.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.orders.diff >= 0 %}+{% endif %}{{ kpis.orders.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Active Customers</div><div class="value">{{ kpis.customers.value }}</div></div><div class="diff {% if kpis.customers.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.customers.diff >= 0 %}+{% endif %}{{ kpis.customers.diff }}%</div></div></div>
-    <div class="card"><div class="kpi"><div><div class="label badge">Growth Rate</div><div class="value">₹ {{ kpis.growth.value|floatformat:2 }}</div></div><div class="diff {% if kpis.growth.diff >= 0 %}positive{% else %}negative{% endif %}">{% if kpis.growth.diff >= 0 %}+{% endif %}{{ kpis.growth.diff }}%</div></div></div>
+
+<main class="container mx-auto p-4 space-y-6">
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Total Revenue</span>
+        <i class="fas fa-coins text-indigo-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">₹ 150,000</div>
+      <div class="mt-1 text-green-500">+10%</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Orders</span>
+        <i class="fas fa-shopping-cart text-pink-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">1,250</div>
+      <div class="mt-1 text-green-500">+8%</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Active Customers</span>
+        <i class="fas fa-users text-yellow-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">780</div>
+      <div class="mt-1 text-red-500">-2%</div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 font-semibold">Growth Rate</span>
+        <i class="fas fa-chart-line text-green-500 text-2xl"></i>
+      </div>
+      <div class="text-3xl font-bold mt-2">₹ 12,000</div>
+      <div class="mt-1 text-green-500">+5%</div>
+    </div>
   </div>
 
-  <nav class="section-tabs">
-    <a href="{% url 'Sales:daily' %}">Daily</a>
-    <a href="{% url 'Sales:monthly' %}" class="active">Monthly</a>
-    <a href="{% url 'Sales:products' %}">Products</a>
-    <a href="{% url 'Sales:top_sellers' %}">Top Sellers</a>
-    <a href="{% url 'Sales:customers' %}">Customers</a>
+  <!-- Tabs -->
+  <nav class="flex flex-wrap gap-2 bg-gray-100 p-2 rounded-lg">
+    <a href="{% url 'Sales:daily' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Daily</a>
+    <a href="{% url 'Sales:monthly' %}" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Monthly</a>
+    <a href="{% url 'Sales:products' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Products</a>
+    <a href="{% url 'Sales:top_sellers' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Top Sellers</a>
+    <a href="{% url 'Sales:customers' %}" class="px-4 py-2 rounded-lg text-indigo-600 hover:bg-indigo-200">Customers</a>
   </nav>
 
-  <div class="grid" style="grid-template-columns: 2fr 1fr;">
-    <div class="card">
-      <h3>Monthly Revenue Trend (12 month overview)</h3>
-      <div class="chart-box">
+  <!-- Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h3 class="text-xl font-semibold mb-4">Monthly Revenue Trend (12 month overview)</h3>
+      <div class="relative w-full h-64 sm:h-80">
         <canvas id="monthlyChart"></canvas>
       </div>
     </div>
-    <div class="card">
-      <h3>Sales by Category (distribution)</h3>
-      <div class="chart-box">
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h3 class="text-xl font-semibold mb-4">Sales by Category</h3>
+      <div class="relative w-full h-64 sm:h-80">
         <canvas id="catChart"></canvas>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <h3>Key Performance Metrics (Monthly Comparison)</h3>
-    <p>This Month: <span class="badge">₹ {{ perf.this_month|floatformat:2 }}</span> &nbsp; 
-       Last Month: <span class="badge">₹ {{ perf.last_month|floatformat:2 }}</span> &nbsp;
-       Difference: <span class="badge" style="color:{% if perf.diff >= 0 %}#7CFFB2{% else %}#FFA6A6{% endif %}">{% if perf.diff >= 0 %}+{% endif %}{{ perf.diff }}%</span>
+  <!-- Monthly Comparison -->
+  <div class="bg-white p-6 rounded-2xl shadow">
+    <h3 class="text-xl font-semibold mb-2">Key Performance Metrics</h3>
+    <p class="text-gray-700">
+      This Month: <span class="badge px-2 py-1 bg-green-200 rounded">₹ 150,000</span> &nbsp;
+      Last Month: <span class="badge px-2 py-1 bg-gray-200 rounded">₹ 135,000</span> &nbsp;
+      Difference: <span class="badge px-2 py-1 rounded" style="color:#7CFFB2">+11%</span>
     </p>
   </div>
-</div>
+
+</main>
+
+<footer class="text-center text-sm text-gray-500 p-4 mt-6">© 2025 Sales Reporting</footer>
 
 <script>
-const months = {{ months|safe }};
-const revs = {{ revs|safe }};
-const catLabels = {{ cat_labels|safe }};
-const catData = {{ cat_data|safe }};
+// Dummy data for Monthly Charts
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const revs = [12000, 15000, 14000, 16000, 18000, 20000, 21000, 22000, 19000, 23000, 25000, 27000];
+const catLabels = ['Electronics','Clothing','Groceries','Furniture','Toys'];
+const catData = [40, 25, 20, 10, 5];
 
 new Chart(document.getElementById('monthlyChart').getContext('2d'), {
   type: 'bar',
-  data: { labels: months, datasets: [{ label: 'Revenue', data: revs }] },
+  data: { labels: months, datasets: [{ label: 'Revenue', data: revs, backgroundColor: '#6366F1' }] },
   options: { responsive:true, maintainAspectRatio:false }
 });
 
 new Chart(document.getElementById('catChart').getContext('2d'), {
   type: 'pie',
-  data: { labels: catLabels, datasets: [{ data: catData }] },
+  data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: ['#6366F1','#EC4899','#F59E0B','#10B981','#3B82F6'] }] },
   options: { responsive:true, maintainAspectRatio:false }
 });
 </script>
+
 </body>
 </html>
