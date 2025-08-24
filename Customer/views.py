@@ -22,7 +22,7 @@ def add_customer(request):
             return redirect('Customer:customer_list')
     else:
         form = CustomerForm()
-    return render(request, 'customer/add_customer.html', {'form': form})
+    return render(request, 'Customer/add_customer.html', {'form': form})
 
 
 #def customer_list(request):
