@@ -76,7 +76,7 @@ def user_profile(request):
         user.save()
 
         messages.success(request, 'Profile updated successfully.')
-        return redirect('user_profile')
+        return redirect('authu:user_profile')
 
     return render(request, 'authu/user_profile.html')
 
