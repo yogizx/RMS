@@ -6,41 +6,63 @@
 <title>Stock History</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-    * { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
-    body { background: #f5f7fa; color: #333; padding: 20px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+    body { background: #f5f7fa; color: #333; padding: 20px; line-height: 1.5; }
 
-    h1 { text-align:center; font-size:28px; margin-bottom: 20px; color:#001f3f; }
+    h1 { text-align: center; font-size: 26px; margin-bottom: 20px; color: #001f3f; font-weight: 700; }
 
     /* ---------- Table Container ---------- */
-    .table-container { overflow-x:auto; background:#fff; border-radius:12px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-
-    table { width:100%; border-collapse: separate; border-spacing:0; min-width:600px; }
-    th, td { padding:12px 15px; text-align:left; font-size:14px; }
-    th { background:#001f3f; color:#fff; font-weight:600; border-bottom:2px solid #ddd; }
-    tr:nth-child(even) { background:#f9f9f9; }
-    tr:hover { background:#e3f2fd; }
-
-    /* ---------- Responsive Cards for Mobile ---------- */
-    @media(max-width:768px) {
-        table { display:none; }
-        .history-cards { display:grid; gap:15px; }
-        .history-card { background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
-        .history-card h2 { font-size:16px; margin-bottom:8px; color:#001f3f; }
-        .history-card p { font-size:14px; margin:4px 0; }
-        .history-card span { font-weight:500; color:#007bff; }
+    .table-container { 
+        overflow-x: auto; 
+        background: #fff; 
+        border-radius: 12px; 
+        padding: 10px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
     }
 
-    /* ---------- Table Scrollbar Styling ---------- */
-    .table-container::-webkit-scrollbar { height:8px; }
-    .table-container::-webkit-scrollbar-thumb { background:#001f3f; border-radius:4px; }
-    .table-container::-webkit-scrollbar-track { background:#f0f0f0; border-radius:4px; }
+    table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0; 
+        min-width: 600px; 
+    }
+
+    th, td { 
+        padding: 12px 15px; 
+        text-align: left; 
+        font-size: 14px; 
+        white-space: nowrap; 
+    }
+
+    th { 
+        background: #001f3f; 
+        color: #fff; 
+        font-weight: 600; 
+        border-bottom: 2px solid #ddd; 
+    }
+
+    tr:nth-child(even) { background: #f9f9f9; }
+    tr:hover { background: #e3f2fd; transition: background 0.3s ease; }
+
+    /* ---------- Scrollbar Styling ---------- */
+    .table-container::-webkit-scrollbar { height: 8px; }
+    .table-container::-webkit-scrollbar-thumb { background: #001f3f; border-radius: 4px; }
+    .table-container::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+
+    /* ---------- Responsive: Force Scroll on Mobile ---------- */
+    @media(max-width: 768px) {
+        .table-container { padding: 5px; }
+        table { min-width: 500px; font-size: 13px; }
+        th, td { padding: 10px; }
+        h1 { font-size: 22px; }
+    }
 </style>
 </head>
 <body>
 
 <h1>📜 Stock History</h1>
 
-<!-- Desktop Table -->
+<!-- Responsive Table -->
 <div class="table-container">
     <table>
         <thead>
@@ -58,8 +80,8 @@
                 <td>{{ item.product.name }}</td>
                 <td>{{ item.change_quantity }}</td>
                 <td>{{ item.updated_by }}</td>
-                <td>{{ item.timestamp }}</td>
-                <td>{{ item.note }}</td>
+                <td>{{ item.timestamp|date:"Y-m-d H:i" }}</td>
+                <td>{{ item.note|default:"-" }}</td>
             </tr>
             {% empty %}
             <tr>
@@ -68,19 +90,6 @@
             {% endfor %}
         </tbody>
     </table>
-</div>
-
-<!-- Mobile Cards -->
-<div class="history-cards">
-    {% for item in history %}
-    <div class="history-card">
-        <h2>{{ item.product.name }}</h2>
-        <p><strong>Change:</strong> <span>{{ item.change_quantity }}</span></p>
-        <p><strong>Updated By:</strong> {{ item.updated_by }}</p>
-        <p><strong>Time:</strong> {{ item.timestamp }}</p>
-        <p><strong>Note:</strong> {{ item.note|default:"-" }}</p>
-    </div>
-    {% endfor %}
 </div>
 
 </body>
