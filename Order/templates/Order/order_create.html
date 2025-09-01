@@ -241,10 +241,25 @@ body {
 // ----------------------
 let scanner; // store scanner instance
 
+function playBeep() {
+  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  audio.play();
+}
+
+function vibrate() {
+  if ("vibrate" in navigator) {
+    navigator.vibrate(200); // vibrate for 200ms
+  }
+}
+
 function onScanSuccess(decodedText, decodedResult) {
   // Stop scanning temporarily
   scanner.pause();
   
+  // Beep + Vibrate
+  playBeep();
+  vibrate();
+
   // Fetch product and add to table
   fetch(`/order/add_to_order/?barcode=${decodedText}`)
     .then((res) => res.json())
