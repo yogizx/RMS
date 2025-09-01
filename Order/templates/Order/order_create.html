@@ -236,17 +236,32 @@ body {
 </div>
 
 <script>
+// ----------------------
+// Barcode Scan Cooldown
+// ----------------------
+let scanner; // store scanner instance
+
 function onScanSuccess(decodedText, decodedResult) {
-        fetch(`/order/add_to_order/?barcode=${decodedText}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              addProductToTable(data.item);
-            } else {
-              alert(data.error);
-            }
-          });
+  // Stop scanning temporarily
+  scanner.pause();
+  
+  // Fetch product and add to table
+  fetch(`/order/add_to_order/?barcode=${decodedText}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        addProductToTable(data.item);
+      } else {
+        alert(data.error);
       }
+    })
+    .finally(() => {
+      // Resume scanning after 1 second
+      setTimeout(() => {
+        scanner.resume();
+      }, 1000);
+    });
+}
 
       function addProductToTable(item) {
         const tbody = document.getElementById("order-items");
@@ -413,11 +428,11 @@ console.log(items);
       // ----------------------
       // Init QR Scanner
       // ----------------------
-      const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+      scanner = new Html5QrcodeScanner("reader", {
         fps: 10,
         qrbox: 250,
       });
-      html5QrcodeScanner.render(onScanSuccess);
+      scanner.render(onScanSuccess);
     </script>
 </body>
 </html>
